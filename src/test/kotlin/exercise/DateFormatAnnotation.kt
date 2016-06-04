@@ -1,6 +1,5 @@
 package ru.yole.jkid.exercise
 
-import org.junit.Ignore
 import org.junit.Test
 import ru.yole.jkid.DateFormat
 import ru.yole.jkid.deserialization.deserialize
@@ -14,7 +13,6 @@ data class Person(
         @DateFormat("dd-mm-yyyy") val birthDate: Date
 )
 
-@Ignore
 class DateFormatTest {
     private val value = Person("Alice", SimpleDateFormat("dd-mm-yyyy").parse("13-02-1987"))
     private val json = """{"birthDate": "13-02-1987", "name": "Alice"}"""
