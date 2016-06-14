@@ -75,6 +75,13 @@ fun Seed.createSeedForType(paramType: Type): Seed {
         }
         return ObjectCollectionSeed(elementType, classInfoCache)
     }
+    if (Map::class.java.isAssignableFrom(paramClass)) {
+        val parameterizedType = paramType as? ParameterizedType
+                ?: throw UnsupportedOperationException("Unsupported parameter type $this")
+
+        val elementType = parameterizedType.actualTypeArguments[1]
+        return MapSeed(elementType, classInfoCache)
+    }
     return ObjectSeed(paramClass.kotlin, classInfoCache)
 }
 
@@ -133,4 +140,19 @@ class ValueCollectionSeed(override val classInfoCache: ClassInfoCache) : Seed {
     }
 
     override fun spawn() = elements
+}
+
+class MapSeed(val elementType: Type, override val classInfoCache: ClassInfoCache) : Seed {
+    private val valueMap = mutableMapOf<String, Any?>()
+    private val seedMap = mutableMapOf<String, Seed>()
+
+    override fun setSimpleProperty(propertyName: String, value: Any?) {
+        valueMap[propertyName] = value
+    }
+
+    override fun createCompositeProperty(propertyName: String) =
+            createSeedForType(elementType).apply { seedMap[propertyName] = this }
+
+    override fun spawn(): Map<String, Any?> =
+            valueMap + seedMap.mapValues { it.value.spawn() }
 }
